@@ -2,30 +2,32 @@ name: Periodic health check
 
 on:  push
 
-steps:
-  - name: Check the deployed service URL
-    uses: jtalk/url-health-check-action@v1.2
-    with:
-      # Check the following URLs one by one sequentially
-      url: https://fullstack11.herokuapp.com/health
-      # Follow redirects, or just report success on 3xx status codes
-      follow-redirect: no # Optional, defaults to "no"
-      # Fail this action after this many failed attempts
-      max-attempts: 2 # Optional, defaults to 1
-      # Delay between retries
-      retry-delay: 5s # Optional, only applicable to max-attempts > 1
-  - name: Report to Slack
-    if: ${{ failure() }}
-    uses: 8398a7/action-slack@v3
-    with:
-      status: custom
-      fields: repo
-      custom_payload: |
-        {
-          attachments: [{
-            color: danger',
-            text: `Healthcheck for ${process.env.AS_REPO} failed.`,
-          }]
-        }
-    env:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+jobs:
+  Health check:
+  steps:
+    - name: Check the deployed service URL
+      uses: jtalk/url-health-check-action@v1.2
+      with:
+        # Check the following URLs one by one sequentially
+        url: https://fullstack11.herokuapp.com/health
+        # Follow redirects, or just report success on 3xx status codes
+        follow-redirect: no # Optional, defaults to "no"
+        # Fail this action after this many failed attempts
+        max-attempts: 2 # Optional, defaults to 1
+        # Delay between retries
+        retry-delay: 5s # Optional, only applicable to max-attempts > 1
+    - name: Report to Slack
+      if: ${{ failure() }}
+      uses: 8398a7/action-slack@v3
+      with:
+        status: custom
+        fields: repo
+        custom_payload: |
+          {
+            attachments: [{
+              color: danger',
+              text: `Healthcheck for ${process.env.AS_REPO} failed.`,
+            }]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
