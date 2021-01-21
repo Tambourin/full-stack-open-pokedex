@@ -49,11 +49,26 @@ jobs:
           healthcheck: "https://fullstack11.herokuapp.com/health"
           checkstring: "ok"
           rollbackonhealthcheckfailed: true
-      - name: Report to Slack 
-      - uses: 8398a7/action-slack@v3
+      - name: Report Failure to Slack
+        if: ${{ failure() && github.event_name == 'push' && contains(join(github.event.commits.*.message), '#skip') == false }}
+        uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
           fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
         env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}       
+      - name: Report Success to Slack
+        if: ${{ success() && github.event_name == 'push' && contains(join(github.event.commits.*.message), '#skip') == false}}
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          fields: commit,repo,author,job,took
+          custom_payload: |
+            {
+              attachments: [{
+                color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+                text: `A new new version of ${process.env.AS_REPO} deployed by ${process.env.AS_AUTHOR} ${{ job.status }} in ${process.env.AS_TOOK}`,
+              }]
+            }
+        env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        if: always() # Pick up events even if the job fails or is canceled.
