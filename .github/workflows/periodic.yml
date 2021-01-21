@@ -17,7 +17,7 @@ jobs:
           # Fail this action after this many failed attempts
           max-attempts: 2 # Optional, defaults to 1
           # Delay between retries
-          retry-delay: 5s # Optional, only applicable to max-attempts > 1
+          retry-delay: 5s
       - name: Report to Slack
         if: ${{ failure() }}
         uses: 8398a7/action-slack@v3
