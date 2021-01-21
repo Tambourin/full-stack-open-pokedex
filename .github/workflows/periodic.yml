@@ -27,7 +27,7 @@ jobs:
           custom_payload: |
             {
               attachments: [{
-                color: danger',
+                color: 'danger',
                 text: `Healthcheck for ${process.env.AS_REPO} failed.`,
               }]
             }
